@@ -1,11 +1,11 @@
 import sys
 import os
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QMessageBox,
+from PyQt6.QtWidgets import (QApplication, QMainWindow, QMessageBox,
                              QFileDialog, QListView, QSizePolicy, QVBoxLayout)
-from PyQt5.QtCore import QStringListModel
-from PyQt5 import uic, QtCore
+from PyQt6.QtCore import QStringListModel
+from PyQt6 import uic, QtCore
 
-#from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 import plotly.graph_objects as go
 
 
@@ -25,10 +25,9 @@ class MainWindow(QMainWindow):
         self._files = None
 
         # plotly web browser
-        #self._browser = QWebEngineView(self.main_graphic)
-        #vlayout = QVBoxLayout(self.main_graphic)
-        #vlayout.addWidget(self._browser)
-        #self._make_graphics()
+        self._browser = QWebEngineView()
+        self._make_graphics()
+        self.tabWidget.addTab(self._browser, "График")
 
         # connect buttons to functions
         self.open_mainfile.clicked.connect(self.browse_file)
@@ -72,10 +71,7 @@ class MainWindow(QMainWindow):
     def _make_graphics(self):
         fig = go.Figure(data=[go.Scatter(x=[1, 2, 3], y=[4, 5, 6], mode='lines+markers')])
         html_content = fig.to_html(full_html=False, include_plotlyjs='cdn')
-        #try:
-        #    self._browser.setHtml(html_content)
-        #except Exception as e:
-        #    print(f'Error: {e}')
+        self._browser.setHtml(html_content)
 
     @staticmethod
     def read_directory(directory):
@@ -88,13 +84,13 @@ class MainWindow(QMainWindow):
 
 
 def main():
-    os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = \
-        'C:\\София\\София\\python\\UI_diploma_1\\.venv\\Lib\\site-packages\\PyQt5\\Qt5\\plugins\\platforms'
+    #os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = \
+    #    'C:\\София\\София\\python\\UI_diploma_1\\.venv\\Lib\\site-packages\\PyQt5\\Qt5\\plugins\\platforms'
 
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == '__main__':
