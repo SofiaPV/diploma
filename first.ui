@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>568</width>
-    <height>424</height>
+    <width>659</width>
+    <height>466</height>
    </rect>
   </property>
   <property name="palette">
@@ -16,9 +16,9 @@
      <colorrole role="WindowText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>255</red>
-        <green>255</green>
-        <blue>255</blue>
+        <red>66</red>
+        <green>71</green>
+        <blue>105</blue>
        </color>
       </brush>
      </colorrole>
@@ -79,9 +79,9 @@
      <colorrole role="BrightText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>255</red>
-        <green>255</green>
-        <blue>255</blue>
+        <red>249</red>
+        <green>177</green>
+        <blue>122</blue>
        </color>
       </brush>
      </colorrole>
@@ -178,9 +178,9 @@
      <colorrole role="ToolTipText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>255</red>
-        <green>255</green>
-        <blue>255</blue>
+        <red>249</red>
+        <green>177</green>
+        <blue>122</blue>
        </color>
       </brush>
      </colorrole>
@@ -198,9 +198,9 @@
      <colorrole role="WindowText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>255</red>
-        <green>255</green>
-        <blue>255</blue>
+        <red>66</red>
+        <green>71</green>
+        <blue>105</blue>
        </color>
       </brush>
      </colorrole>
@@ -261,9 +261,9 @@
      <colorrole role="BrightText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>255</red>
-        <green>255</green>
-        <blue>255</blue>
+        <red>249</red>
+        <green>177</green>
+        <blue>122</blue>
        </color>
       </brush>
      </colorrole>
@@ -360,9 +360,9 @@
      <colorrole role="ToolTipText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>255</red>
-        <green>255</green>
-        <blue>255</blue>
+        <red>249</red>
+        <green>177</green>
+        <blue>122</blue>
        </color>
       </brush>
      </colorrole>
@@ -443,9 +443,9 @@
      <colorrole role="BrightText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>255</red>
-        <green>255</green>
-        <blue>255</blue>
+        <red>249</red>
+        <green>177</green>
+        <blue>122</blue>
        </color>
       </brush>
      </colorrole>
@@ -542,9 +542,9 @@
      <colorrole role="ToolTipText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>255</red>
-        <green>255</green>
-        <blue>255</blue>
+        <red>249</red>
+        <green>177</green>
+        <blue>122</blue>
        </color>
       </brush>
      </colorrole>
@@ -820,26 +820,8 @@
              <item>
               <widget class="QTabWidget" name="tabWidget">
                <property name="currentIndex">
-                <number>0</number>
+                <number>-1</number>
                </property>
-               <widget class="QWidget" name="main_tab">
-                <property name="cursor">
-                 <cursorShape>ArrowCursor</cursorShape>
-                </property>
-                <attribute name="title">
-                 <string>Tab 1</string>
-                </attribute>
-                <layout class="QVBoxLayout" name="verticalLayout_4">
-                 <item>
-                  <widget class="QWidget" name="main_graphic" native="true"/>
-                 </item>
-                </layout>
-               </widget>
-               <widget class="QWidget" name="tab_2">
-                <attribute name="title">
-                 <string>Tab 2</string>
-                </attribute>
-               </widget>
               </widget>
              </item>
             </layout>
@@ -881,7 +863,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>568</width>
+     <width>659</width>
      <height>22</height>
     </rect>
    </property>
