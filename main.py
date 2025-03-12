@@ -8,6 +8,9 @@ from PyQt6 import uic, QtCore
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 import plotly.graph_objects as go
 
+from Visualiser import Visualiser
+
+
 
 class MainWindow(QMainWindow):
 
@@ -23,10 +26,10 @@ class MainWindow(QMainWindow):
         self._main_file_name = None
         self._directory = None
         self._files = None
+        self._visualiser = Visualiser()
 
         # plotly web browser
         self._browser = QWebEngineView()
-        self._make_graphics()
         self.tabWidget.addTab(self._browser, "График")
 
         # connect buttons to functions
@@ -50,6 +53,10 @@ class MainWindow(QMainWindow):
 
         self.mainfile.setText(filename[0].split('/')[-1])  # !!! нормальный сплит
         self._main_file_name = filename[0]
+        self._visualiser._mainfile_name = filename[0]
+
+        if self._visualiser._files is not None:  # !!! @property, @__.setter
+            self._make_graphics()
 
     def browse_directory(self):
         try:
@@ -67,10 +74,13 @@ class MainWindow(QMainWindow):
             current_files.append(file.split('\\')[-1])
 
         self._model.setStringList(current_files)
+        self._visualiser._files = self._files
+
+        if self._visualiser._mainfile_name is not None:
+            self._make_graphics()
 
     def _make_graphics(self):
-        fig = go.Figure(data=[go.Scatter(x=[1, 2, 3], y=[4, 5, 6], mode='lines+markers')])
-        html_content = fig.to_html(full_html=False, include_plotlyjs='cdn')
+        html_content = self._visualiser.make_visuals()
         self._browser.setHtml(html_content)
 
     @staticmethod
