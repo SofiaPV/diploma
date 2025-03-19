@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>659</width>
-    <height>466</height>
+    <width>651</width>
+    <height>452</height>
    </rect>
   </property>
   <property name="palette">
@@ -777,7 +777,7 @@
          <property name="lineWidth">
           <number>0</number>
          </property>
-         <layout class="QHBoxLayout" name="horizontalLayout" stretch="5,1">
+         <layout class="QHBoxLayout" name="horizontalLayout" stretch="5">
           <property name="spacing">
            <number>0</number>
           </property>
@@ -827,29 +827,6 @@
             </layout>
            </widget>
           </item>
-          <item>
-           <widget class="QFrame" name="frame_7">
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Raised</enum>
-            </property>
-            <widget class="QPushButton" name="pushButton">
-             <property name="geometry">
-              <rect>
-               <x>10</x>
-               <y>20</y>
-               <width>75</width>
-               <height>23</height>
-              </rect>
-             </property>
-             <property name="text">
-              <string>PushButton</string>
-             </property>
-            </widget>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -863,7 +840,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>659</width>
+     <width>651</width>
      <height>22</height>
     </rect>
    </property>

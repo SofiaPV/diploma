@@ -143,16 +143,9 @@ class Visualiser:
 
         # Настройка кнопки "play" для анимации
         fig.update_layout(
-            updatemenus=[dict(
-                type='buttons',
-                showactive=False,
-                buttons=[dict(
-                    label='▶',
-                    method='animate',
-                    args=[None, dict(frame=dict(duration=100, redraw=True),
-                                     fromcurrent=True)]
-                )]
-            )],
+            margin=dict(
+                r=250,  # Отступ справа
+            ),
             sliders=[dict(
                 active=0,
                 currentvalue=dict(prefix="Кадр: "),
@@ -160,7 +153,7 @@ class Visualiser:
                     label=str(time_group),
                     method='animate',
                     args=[[str(time_group)], dict(frame=dict(duration=100, redraw=True))],
-                ) for time_group in df['time'].unique()]
+                ) for time_group in df['time'].unique()],
             )],
             plot_bgcolor='black',  # Цвет фона графика
             paper_bgcolor='black',  # Цвет фона вокруг графика
@@ -236,7 +229,7 @@ class Visualiser:
     def visualize_original_data(self):
         data = [self._calculator.mainframe] + self._calculator.original_points
         df = self._make_df(data)
-        fig = px.scatter_3d(df, x='x', y='y', z='z')
+        fig = px.scatter_3d(df, x='x', y='y', z='z', animation_frame="time")
 
         # animation frames
         frames = [
@@ -252,7 +245,8 @@ class Visualiser:
                             size=5,
                             color='blue',
                         ),
-                        name=f"Точки в процессе эксперимента"
+                        name=f"Точки в процессе эксперимента",
+                        showlegend=True,
                     )
                 ],
                 name=str(time_group),
@@ -280,16 +274,6 @@ class Visualiser:
 
         # "play" button
         fig.update_layout(
-            updatemenus=[dict(
-                type='buttons',
-                showactive=False,
-                buttons=[dict(
-                    label='▶',
-                    method='animate',
-                    args=[None, dict(frame=dict(duration=100, redraw=True),
-                                     fromcurrent=True)]
-                )]
-            )],
             sliders=[dict(
                 active=0,
                 currentvalue=dict(prefix="Кадр: "),
@@ -325,6 +309,14 @@ class Visualiser:
                     range=z_range,
                     #fixedrange=True,  # фиксированный диапазон
                 ),
+            ),
+            legend=dict(
+                title=None,  # "Группы точек",
+                orientation="h",
+                x=0.5,
+                xanchor="center",
+                y=1.,
+                yanchor="bottom"
             ),
         )
 
