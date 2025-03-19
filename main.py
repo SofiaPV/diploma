@@ -11,7 +11,6 @@ import plotly.graph_objects as go
 from Visualiser import Visualiser
 
 
-
 class MainWindow(QMainWindow):
 
     def __init__(self):
@@ -29,8 +28,10 @@ class MainWindow(QMainWindow):
         self._visualiser = Visualiser()
 
         # plotly web browser
-        self._browser = QWebEngineView()
-        self.tabWidget.addTab(self._browser, "График")
+        self._data_view = QWebEngineView()
+        self._calculations_view = QWebEngineView()
+        self.tabWidget.addTab(self._data_view, "Данные")
+        self.tabWidget.addTab(self._calculations_view, "Вычисления")
 
         # connect buttons to functions
         self.open_mainfile.clicked.connect(self.browse_file)
@@ -53,9 +54,9 @@ class MainWindow(QMainWindow):
 
         self.mainfile.setText(filename[0].split('/')[-1])  # !!! нормальный сплит
         self._main_file_name = filename[0]
-        self._visualiser._mainfile_name = filename[0]
+        self._visualiser.mainfile_name = filename[0]
 
-        if self._visualiser._files is not None:  # !!! @property, @__.setter
+        if self._visualiser.files is not None:  # !!! @property, @__.setter
             self._make_graphics()
 
     def browse_directory(self):
@@ -74,14 +75,16 @@ class MainWindow(QMainWindow):
             current_files.append(file.split('\\')[-1])
 
         self._model.setStringList(current_files)
-        self._visualiser._files = self._files
+        self._visualiser.files = self._files
 
-        if self._visualiser._mainfile_name is not None:
+        if self._visualiser.mainfile_name is not None:
             self._make_graphics()
 
     def _make_graphics(self):
-        html_content = self._visualiser.make_visuals()
-        self._browser.setHtml(html_content)
+        html_content = self._visualiser.visualize_original_data()
+        self._data_view.setHtml(html_content)
+        html2 = self._visualiser.visualize_calculations()
+        self._calculations_view.setHtml(html2)
 
     @staticmethod
     def read_directory(directory):

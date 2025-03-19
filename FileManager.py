@@ -17,24 +17,3 @@ class FileManager:
         f.close()
         return data
 
-    @staticmethod
-    def spit_file_data(filename=None, data=None):
-        """
-        :param filename: a filename to read and to split into dimensions
-                         if None, array [[x1, y1, z1], ...] passed into
-                         data
-        :param data: array to split, if None than must give a filename with
-                     data
-        :return: x:List, y:List, z:List
-        """
-        if filename:
-            data = FileManager.get_points(filename)
-        if data is None:
-            return
-
-        x, y, z = [], [], []
-        for line in data:
-            x.append(line[0])
-            y.append(line[1])
-            z.append(line[2])
-        return x, y, z

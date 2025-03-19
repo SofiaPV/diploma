@@ -1,20 +1,56 @@
 import numpy as np
+import math
 from FileManager import FileManager
 
 
 class Calculator:
 
     def __init__(self, mainfile=None, files=None):
-        self._manager = FileManager(mainfile, files)
+        self._manager = FileManager(mainfile, files)  # !!! getter, setter
+        self._mainfile = mainfile
+        self._files = files
 
         self._main = None  # main frame
-        self._original_points = None  # a [x, y, z] array for visualization
+        self._original_points = []  # a [x, y, z] array for visualization
                                       # before movement
-        self._moved_points = None   #  a [x, y, z] array after movement
-        self._frame_info = None     # an array with rotation matrix[0],
-                                    # matrix of movement[1] and angles[2]
+        self._moved_points = []   #  a [x, y, z] array after movement
+        self._frame_info = dict()
 
+    @property
+    def mainfile(self):
+        return self._mainfile
 
+    @property
+    def files(self):
+        return self._files
+
+    @mainfile.setter
+    def mainfile(self, new):
+        self._mainfile = new
+
+    @files.setter
+    def files(self, new):
+        self._files = new
+
+    @property
+    def mainframe(self):
+        if self._main is None:
+            self._read()
+        return self._main
+
+    @property
+    def original_points(self):
+        if len(self._original_points) == 0:
+            self._read()
+        return self._original_points
+
+    @property
+    def moved_points(self):
+        return self._moved_points
+
+    @property
+    def frame_info(self):
+        return self._frame_info
 
     @staticmethod
     def _make_matrices(m, num_of_rows=3, points_in_row=5):
@@ -31,14 +67,64 @@ class Calculator:
         return np.array(ans)
 
     @staticmethod
-    def calc_matrices(points, deformed_points, num_of_rows=3, points_in_row=5, l=0):
+    def compute_angels(matrix, in_angles=False):
+        """
+        :matrix: a rotation matrix
+        :in_angles: if True, returns rotations in angles, else in radians
+        :return [[theta (y axis), psi(rotation about x axis), phi (z-axis)], ...]
+        """
 
-        before = Calculator._make_matrices(points, num_of_rows, points_in_row)
-        after = deformed_points[:num_of_rows * points_in_row]
+        if matrix[2][0] != 1 and matrix[2][0] != -1:
+
+            angles = np.array([[0., 0., 0.], [0., 0., 0.]])
+
+            # theta
+            angles[0][0] = -math.asin(matrix[2][0])
+            angles[1][0] = math.pi - angles[0][0]
+
+            # psi
+            angles[0][1] = math.atan2(matrix[2][1] / math.cos(angles[0][0]), matrix[2][2] / math.cos(angles[0][0]))
+            angles[1][1] = math.atan2(matrix[2][1] / math.cos(angles[1][0]), matrix[2][2] / math.cos(angles[1][0]))
+
+            # phi
+            angles[0][2] = math.atan2(matrix[1][0] / math.cos(angles[0][0]), matrix[0][0] / math.cos(angles[0][0]))
+            angles[1][2] = math.atan2(matrix[1][0] / math.cos(angles[1][0]), matrix[0][0] / math.cos(angles[1][0]))
+
+            return angles if not in_angles else angles * 180 / math.pi
+
+        else:
+            # phi = anything, let it be 0
+            phi, theta, psi = 0, 0, 0
+            if matrix[2][0] == -1:
+                theta = math.pi / 2
+                psi = phi + math.atan2(matrix[0][1], matrix[0][2])
+            else:
+                theta = -math.pi / 2
+                psi = -phi + math.atan2(-matrix[0][1], -matrix[0][2])
+            return [[theta, psi, phi]]
+
+    @staticmethod
+    def calc_matrices(before, after, l=0):
 
         xtx = before.T @ before
         weigths = np.linalg.inv(xtx + np.eye(xtx.shape[0]) * l) @ before.T @ after
 
         return weigths[:3, :], weigths[-1, :]  # M, b
 
+    def _read(self):
+        self._main = self._manager.get_points(self._mainfile)
+        for fname in self._files:
+            self._original_points.append(self._manager.get_points(fname))
 
+    def calculate(self, num_of_rows=3, points_in_row=5, l=0):
+        """
+        takes original points, calculates rotation matrices, movement matrices,
+        angles, new position for every fame of deformed points
+        """
+        # !!! check if read data
+        before = Calculator._make_matrices(self._main, num_of_rows, points_in_row)
+        for i, frame in enumerate(self._original_points):
+            after = np.array(frame[:num_of_rows * points_in_row])
+            M, b = self.calc_matrices(before, after, l)
+            self._frame_info[i] = [M, b, self.compute_angels(M, True)]
+            self._moved_points.append(self._main @ M + b)
