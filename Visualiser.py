@@ -87,6 +87,8 @@ class Visualiser:
         moved = self._calculator.moved_points
 
         df = self._make_df_calculated(orig, moved)
+        frame_info = self._calculator.frame_info
+
         fig = px.scatter_3d(df, x='x', y='y', z='z', animation_frame="time", color='group')
 
         frames = []
@@ -120,16 +122,23 @@ class Visualiser:
                     data=traces,
                     layout=dict(
                         annotations=[dict(
-                            x=1.075,
-                            y=0.5,
-                            text=f"Кадр {time_group}",
+                            x=1.,
+                            y=1.,
+                            text=f"Матрица:<br>{frame_info[time_group][0][0]}<br>{frame_info[time_group][0][1]}"
+                                 f"<br>{frame_info[time_group][0][2]}<br>"
+                                 f"Сдвиг:<br>{frame_info[time_group][1]}<br>"
+                                 f"Углы (°):<br>{frame_info[time_group][2][0]}<br>{frame_info[time_group][2][1]}"
+                                 f"<br>Вращение произведено вокруг осей в<br>следующем порядке: x, y, z",
                             showarrow=False,
-                            font=dict(size=12, color="black"),
-                            align="right",
+                            font=dict(size=12, color="white"),
+                            align="left",
                             bordercolor="black",
                             borderwidth=1,
-                            bgcolor="white",
-                            opacity=0.8
+                            bgcolor="black",
+                            opacity=0.8,
+                            xanchor='left',
+                            #width=200,
+                            #height=400,
                         )]
                     )
                 )
@@ -144,7 +153,7 @@ class Visualiser:
         # Настройка кнопки "play" для анимации
         fig.update_layout(
             margin=dict(
-                r=250,  # Отступ справа
+                r=260,  # Отступ справа
             ),
             sliders=[dict(
                 active=0,
