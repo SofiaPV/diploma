@@ -10,6 +10,20 @@ class Visualiser:
         self._files = files
         self._calculator = Calculator(mainfile, files)
 
+        self._orig_html = None
+        self._calced_html = None
+
+    @property
+    def calculator(self):
+        return self._calculator
+
+    @property
+    def orig_html(self):
+        return self._orig_html
+
+    @property
+    def calced_html(self):
+        return self._calced_html
 
     @property
     def mainfile_name(self):
@@ -198,7 +212,8 @@ class Visualiser:
             )
         )
 
-        return fig.to_html(full_html=False, include_plotlyjs='cdn')
+        self._calced_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+        return self._calced_html
 
     def _flatten(self, data):
         time_points = []
@@ -329,7 +344,8 @@ class Visualiser:
             ),
         )
 
-        return fig.to_html(full_html=False, include_plotlyjs='cdn')
+        self._orig_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+        return self._orig_html
 
 
 

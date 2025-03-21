@@ -101,7 +101,7 @@ class Calculator:
             else:
                 theta = -math.pi / 2
                 psi = -phi + math.atan2(-matrix[0][1], -matrix[0][2])
-            return [[theta, psi, phi]]
+            return np.array([[theta, psi, phi]])
 
     @staticmethod
     def calc_matrices(before, after, l=0):

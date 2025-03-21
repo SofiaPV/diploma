@@ -1,14 +1,12 @@
 import sys
 import os
-from PyQt6.QtWidgets import (QApplication, QMainWindow, QMessageBox,
-                             QFileDialog, QListView, QSizePolicy, QVBoxLayout)
+from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 from PyQt6.QtCore import QStringListModel
-from PyQt6 import uic, QtCore
-
+from PyQt6 import uic
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-import plotly.graph_objects as go
 
 from Visualiser import Visualiser
+from SaveDialog import SaveDialog
 
 
 class MainWindow(QMainWindow):
@@ -36,10 +34,63 @@ class MainWindow(QMainWindow):
         # connect buttons to functions
         self.open_mainfile.clicked.connect(self.browse_file)
         self.open_directory.clicked.connect(self.browse_directory)
+        self.saveButton.triggered.connect(self._open_dialog)
+
+        #  add tool tips
+        self.open_mainfile.setToolTip("Выберите файл с точками (x, y, z) до начала эксперимента. "
+                                      "Формат данных: x\\ty\\tz\\t\\n")
+        self.open_directory.setToolTip("Выберите папку с файлами, содержащие точки (x, y, z) в процессе эксперимента. "
+                                      "Формат данных: x\\ty\\tz\\t\\n")
 
         # listView settings
         self._model = QStringListModel()
         self.file_view.setModel(self._model)
+
+    def _open_dialog(self):
+        dialog = SaveDialog(self)
+        dialog.save_signal.connect(self._save_data)
+        dialog.exec()
+
+    def _message(self, success, message, informative_message):
+        msg = QMessageBox()
+        msg.setStyleSheet(self.styleSheet())
+
+        if success:
+            msg.setIcon(QMessageBox.Icon.Information)
+            msg.setWindowTitle("Успех")
+        else:
+            msg.setIcon(QMessageBox.Icon.Critical)
+            msg.setWindowTitle("Ошибка")
+
+        msg.setText(message)
+        msg.setInformativeText(informative_message)
+        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+
+        msg.exec()
+
+    def _save_data(self, path, save_orig, save_calced):
+        frame_data = self._visualiser.calculator.frame_info
+        if len(frame_data) == 0:
+            self._message(False, "Ошибка!", "Данные еще не были подсчитаны. "
+                                           "Загрузите файлы или дождитесь окончания подсчетов.")
+            return
+
+        #  Writing fame data (M, b, angles) into file
+        for key, arr in frame_data.items():
+            with open(f'{path}/frame{key}_data.txt', 'w') as f:
+                f.write(f"Rotation Matrix: {arr[0].tolist()}\n")
+                f.write(f"Bias: {arr[1].tolist()}\n")
+                f.write(f"Angles: {arr[2].tolist()}\n")
+
+        if save_orig:
+            with open(f'{path}/orig.html', 'w') as f:
+                f.write(self._visualiser.orig_html)
+
+        if save_calced:
+            with open(f'{path}/calced.html', 'w') as f:
+                f.write(self._visualiser.calced_html)
+
+        self._message(True, "", "Данные успешно сохранены.")
 
     def browse_file(self):
         filename = ''
