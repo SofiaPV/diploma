@@ -251,7 +251,10 @@ class Visualiser:
         return df
 
     def visualize_original_data(self):
-        data = [self._calculator.mainframe] + self._calculator.original_points
+        try:
+            data = [self._calculator.mainframe] + self._calculator.original_points
+        except ValueError as e:
+            raise ValueError(f"Данные из файлов не были прочитаны: {e}")
         df = self._make_df(data)
         fig = px.scatter_3d(df, x='x', y='y', z='z', animation_frame="time")
 

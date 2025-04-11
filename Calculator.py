@@ -1,6 +1,6 @@
 import numpy as np
 import math
-from FileManager import FileManager
+from FileManager import FileManager, InvalidFormatError
 
 
 class Calculator:
@@ -15,6 +15,31 @@ class Calculator:
                                       # before movement
         self._moved_points = []   #  a [x, y, z] array after movement
         self._frame_info = dict()
+
+        self._rows = None
+        self._points_in_row = None
+
+    @property
+    def rows(self):
+        return self._rows
+
+    @property
+    def points_in_row(self):
+        return self._points_in_row
+
+    @rows.setter
+    def rows(self, new_value):
+        if not new_value.isdigit():
+            self._rows = None
+            raise ValueError
+        self._rows = int(new_value)
+
+    @points_in_row.setter
+    def points_in_row(self, new_value):
+        if not new_value.isdigit():
+            self._points_in_row = None
+            raise ValueError
+        self._points_in_row = int(new_value)
 
     @property
     def mainfile(self):
@@ -36,12 +61,16 @@ class Calculator:
     def mainframe(self):
         if self._main is None:
             self._read()
+            if self._main is None:
+                raise ValueError
         return self._main
 
     @property
     def original_points(self):
         if len(self._original_points) == 0:
             self._read()
+            if len(self._original_points) == 0:
+                raise ValueError
         return self._original_points
 
     @property
@@ -52,14 +81,14 @@ class Calculator:
     def frame_info(self):
         return self._frame_info
 
-    @staticmethod
-    def _make_matrices(m, num_of_rows=3, points_in_row=5):
+    def _make_matrices(self, m, num_of_rows=3, points_in_row=5):
         """
         :param m: construct matrix for calculation
         :param num_of_rows: rows to use
         :param points_in_row:  how many points a row has
         :return: matrix suitable for calculations
         """
+        print(f"m: {m}\n num_of_rows: {num_of_rows}\npoints_in_row: {points_in_row}")
         ans = []
         for i in range(num_of_rows * points_in_row):
             ans.append(list(m[i]))
@@ -112,17 +141,33 @@ class Calculator:
         return weigths[:3, :], weigths[-1, :]  # M, b
 
     def _read(self):
-        self._main = self._manager.get_points(self._mainfile)
-        for fname in self._files:
-            self._original_points.append(self._manager.get_points(fname))
+        try:
+            self._main = self._manager.get_points(self._mainfile)
+            if len(self._main) != self._points_in_row*self._rows:
+                raise InvalidFormatError("Количество точек не совпадает с заявленным")
+        except (InvalidFormatError, AttributeError) as e:
+            self._main = None
 
-    def calculate(self, num_of_rows=3, points_in_row=5, l=0):
+        for fname in self._files:
+            try:
+                self._original_points.append(self._manager.get_points(fname))
+                if len(self._original_points[-1]) != self._points_in_row * self._rows:
+                    raise InvalidFormatError("Количество точек не совпадает с заявленным")
+            except (InvalidFormatError, AttributeError) as e:
+                self._original_points = []
+
+    def calculate(self):
         """
         takes original points, calculates rotation matrices, movement matrices,
         angles, new position for every fame of deformed points
         """
         # !!! check if read data
-        before = Calculator._make_matrices(self._main, num_of_rows, points_in_row)
+        num_of_rows = 3
+        points_in_row = self._points_in_row
+        l = 0
+
+        print(f"main: {self._main}")
+        before = self._make_matrices(self._main, num_of_rows, points_in_row)
         for i, frame in enumerate(self._original_points):
             after = np.array(frame[:num_of_rows * points_in_row])
             M, b = self.calc_matrices(before, after, l)

@@ -1,5 +1,4 @@
-import os
-from PyQt6.QtWidgets import QApplication, QFileDialog, QDialog
+from PyQt6.QtWidgets import QFileDialog, QDialog, QMessageBox
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
 
@@ -39,3 +38,41 @@ class SaveDialog(QDialog):
         if self._directory is not None:
             self.save_signal.emit(self._directory, self._saveOrig, self._saveCalc)
             self.accept()
+        else:
+            self._message()
+
+    def _message(self):
+        msg = QMessageBox()
+        msg.setStyleSheet("""
+                QMessageBox{
+                    background-color: rgb(45, 50, 80);
+                    color: rgb(255, 255, 255);
+                    font: 10px;
+                }
+                
+                QMessageBox QPushButton {	
+                    background-color: rgb(249, 177, 122);
+                    border-radius: 5px; 
+                    border: none;  
+                    width: 20px; 
+                    height: 20px;
+                }
+                
+                QMessageBox QLabel {
+                    color: rgb(255, 255, 255); 
+                }
+
+                QMessageBox {
+                    font-size: 10pt;
+                    color: rgb(255, 255, 255);
+                }
+        """)
+
+        msg.setIcon(QMessageBox.Icon.Critical)
+        msg.setWindowTitle("Ошибка!")
+
+        msg.setText("Ошибка!")
+        msg.setInformativeText("Не выбрано место сохранения.")
+        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+
+        msg.exec()

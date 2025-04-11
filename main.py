@@ -35,6 +35,11 @@ class MainWindow(QMainWindow):
         self.open_mainfile.clicked.connect(self.browse_file)
         self.open_directory.clicked.connect(self.browse_directory)
         self.saveButton.triggered.connect(self._open_dialog)
+        self.calculate_button.clicked.connect(self._make_graphics)
+
+        # connecting signals
+        self.rows.editingFinished.connect(self._num_of_rows_handler)
+        self.points_in_row.editingFinished.connect(self._num_of_points_handler)
 
         #  add tool tips
         self.open_mainfile.setToolTip("Выберите файл с точками (x, y, z) до начала эксперимента. "
@@ -45,6 +50,21 @@ class MainWindow(QMainWindow):
         # listView settings
         self._model = QStringListModel()
         self.file_view.setModel(self._model)
+
+    def _num_of_points_handler(self):
+        try:
+            self._visualiser.calculator.points_in_row = self.points_in_row.text()
+        except Exception as e:
+            self._message(False, "Ошибка!", "Вы должны ввести целое число в "
+                                            "поля 'Число рядов' и 'Точек в рядах'")
+
+    def _num_of_rows_handler(self):
+        try:
+            self._visualiser.calculator.rows = self.rows.text()
+        except Exception as e:
+            self._message(False, "Ошибка!", "Вы должны ввести целое число в "
+                                            "поля 'Число рядов' и 'Точек в рядах'")
+
 
     def _open_dialog(self):
         dialog = SaveDialog(self)
@@ -93,6 +113,11 @@ class MainWindow(QMainWindow):
         self._message(True, "", "Данные успешно сохранены.")
 
     def browse_file(self):
+        if self._visualiser.calculator.rows is None or self._visualiser.calculator.points_in_row is None:
+            self._message(False, "Ошибка!", "Вначале укажите число рядов и точек в "
+                                            "каждом ряду в полях выше")
+            return
+
         filename = ''
         try:
             filename = QFileDialog.getOpenFileName(self, 'Выберите файл')
@@ -107,10 +132,12 @@ class MainWindow(QMainWindow):
         self._main_file_name = filename[0]
         self._visualiser.mainfile_name = filename[0]
 
-        if self._visualiser.files is not None:  # !!! @property, @__.setter
-            self._make_graphics()
-
     def browse_directory(self):
+        if self._visualiser.calculator.rows is None or self._visualiser.calculator.points_in_row is None:
+            self._message(False, "Ошибка!", "Вначале укажите число рядов и точек в "
+                                            "каждом ряду в полях выше")
+            return
+
         try:
             self._directory = str(QFileDialog.getExistingDirectory(self, "Выберите папку"))
         except Exception as e:
@@ -128,11 +155,24 @@ class MainWindow(QMainWindow):
         self._model.setStringList(current_files)
         self._visualiser.files = self._files
 
-        if self._visualiser.mainfile_name is not None:
-            self._make_graphics()
-
     def _make_graphics(self):
-        html_content = self._visualiser.visualize_original_data()
+
+        if self._visualiser.files is None:
+            self._message(False, "Ошибка!", "Вы не указали папку с файлами "
+                                            "эксперимента")
+            return
+
+        if self._visualiser.mainfile_name is None:
+            self._message(False, "Ошибка!", "Вы не указали файл с опорными точками")
+            return
+
+        self._message(True, "", "Данные обрабатываются. Пожалуйста, подождите.")
+        try:
+            html_content = self._visualiser.visualize_original_data()
+        except ValueError as e:
+            self._message(False, "Ошибка!", f"Программа не смогла интерпретировать "
+                                            f"данные. Проверьте формат входных файлов и/или количество точек в них.")
+            return
         self._data_view.setHtml(html_content)
         html2 = self._visualiser.visualize_calculations()
         self._calculations_view.setHtml(html2)

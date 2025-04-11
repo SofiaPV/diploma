@@ -1,3 +1,6 @@
+class InvalidFormatError(Exception):
+    pass
+
 class FileManager:
 
     def __init__(self, mainfile=None, files=None):
@@ -12,6 +15,19 @@ class FileManager:
         """
         f = open(filename, 'r')  # !!! .txt only
         data = []
+
+        for i, line in enumerate(f):
+            line = line.strip()
+            parts = line.split('\t')
+            if len(parts) != 3:
+                raise InvalidFormatError(f"Не удалось выделить три числа в строке {i}. "
+                                         f"Проверьте формат чисел.")
+            try:
+                data.append(list(map(float, parts)))
+            except ValueError:
+                raise InvalidFormatError(f"Ошибка в строке {i}: не удаётся преобразовать значения в числа.")
+
+
         for line in f:
             data.append(list(map(float, line.split('\t'))))  # !!! only '\t' format
         f.close()

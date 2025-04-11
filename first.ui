@@ -16,9 +16,9 @@
      <colorrole role="WindowText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>66</red>
-        <green>71</green>
-        <blue>105</blue>
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
        </color>
       </brush>
      </colorrole>
@@ -186,10 +186,10 @@
      </colorrole>
      <colorrole role="PlaceholderText">
       <brush brushstyle="SolidPattern">
-       <color alpha="255">
-        <red>103</red>
-        <green>111</green>
-        <blue>157</blue>
+       <color alpha="128">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
        </color>
       </brush>
      </colorrole>
@@ -198,9 +198,9 @@
      <colorrole role="WindowText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>66</red>
-        <green>71</green>
-        <blue>105</blue>
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
        </color>
       </brush>
      </colorrole>
@@ -368,10 +368,10 @@
      </colorrole>
      <colorrole role="PlaceholderText">
       <brush brushstyle="SolidPattern">
-       <color alpha="255">
-        <red>103</red>
-        <green>111</green>
-        <blue>157</blue>
+       <color alpha="128">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
        </color>
       </brush>
      </colorrole>
@@ -380,9 +380,9 @@
      <colorrole role="WindowText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>45</red>
-        <green>50</green>
-        <blue>80</blue>
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
        </color>
       </brush>
      </colorrole>
@@ -452,9 +452,9 @@
      <colorrole role="ButtonText">
       <brush brushstyle="SolidPattern">
        <color alpha="255">
-        <red>45</red>
-        <green>50</green>
-        <blue>80</blue>
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
        </color>
       </brush>
      </colorrole>
@@ -550,10 +550,10 @@
      </colorrole>
      <colorrole role="PlaceholderText">
       <brush brushstyle="SolidPattern">
-       <color alpha="255">
-        <red>103</red>
-        <green>111</green>
-        <blue>157</blue>
+       <color alpha="128">
+        <red>255</red>
+        <green>255</green>
+        <blue>255</blue>
        </color>
       </brush>
      </colorrole>
@@ -566,6 +566,8 @@
   <property name="styleSheet">
    <string notr="true">QMainWindow{
 	background-color: rgb(45, 50, 80);
+	color: rgb(255, 255, 255);
+	font: 10px;
 }
 
 QWidget{
@@ -692,7 +694,51 @@ QMenu::item:hover {
 	background-color: rgb(249, 177, 122);
 	color: rgb(45, 50, 80);
 	font: 12px;
-}</string>
+}
+
+QDialog {
+    font-size: 10pt;
+	color: rgb(255, 255, 255);
+}
+
+QCheckBox {
+	font-size: 10pt;
+	color: rgb(255, 255, 255);
+}
+
+QMessageBox {
+	font-size: 10pt;
+	color: rgb(255, 255, 255);
+}
+
+QMessageBox QLabel {
+    color: rgb(255, 255, 255); 
+}
+
+QCheckBox::indicator {
+    border-radius: 10px; 
+    border: 2px solid rgb(66, 71, 105); 
+    background-color:rgb(45, 50, 80); 
+}
+
+QCheckBox::indicator:checked {
+    background-color:  rgb(249, 177, 122); 
+    border: 2px solid rgb(66, 71, 105); 
+}
+
+QCheckBox::indicator:unchecked {
+    border: 2px solid rgb(66, 71, 105); 
+    background-color:rgb(45, 50, 80); 
+}
+
+QCheckBox::indicator:hover {
+	background-color: rgb(66, 71, 105); 
+}
+
+QLabel {
+    color: rgb(255, 255, 255); 
+}
+</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QFormLayout" name="formLayout">
@@ -722,7 +768,7 @@ QMenu::item:hover {
       <property name="frameShadow">
        <enum>QFrame::Plain</enum>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,9">
+      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,11">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -749,25 +795,107 @@ QMenu::item:hover {
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="sizeConstraint">
-           <enum>QLayout::SetNoConstraint</enum>
-          </property>
-          <property name="leftMargin">
-           <number>3</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>3</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QFrame" name="frame">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="2,0,1">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>Число рядов:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="rows"/>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="frame_2">
+            <property name="frameShape">
+             <enum>QFrame::StyledPanel</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="2,0,1">
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Точек в рядах:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="points_in_row"/>
+             </item>
+            </layout>
+           </widget>
+          </item>
           <item>
            <widget class="QFrame" name="frame_3">
             <property name="frameShape">
@@ -1006,6 +1134,9 @@ QMenu::item:hover {
              </item>
              <item>
               <widget class="QPushButton" name="open_mainfile">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -1081,6 +1212,9 @@ QMenu::item:hover {
                 </item>
                 <item>
                  <widget class="QPushButton" name="open_directory">
+                  <property name="enabled">
+                   <bool>true</bool>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
@@ -1095,6 +1229,13 @@ QMenu::item:hover {
              </item>
              <item>
               <widget class="QListView" name="file_view"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="calculate_button">
+               <property name="text">
+                <string>Посчитать</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -1185,7 +1326,6 @@ QMenu::item:hover {
      <string>Меню</string>
     </property>
     <addaction name="saveButton"/>
-    <addaction name="action_3"/>
    </widget>
    <addaction name="menu"/>
   </widget>
