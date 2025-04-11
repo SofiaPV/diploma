@@ -235,8 +235,12 @@ class Visualiser:
         time_point, x, y, z = self._flatten(orig)
         group = ['red' for _ in x]
         buf = self._flatten(moved)
-        time_point += buf[0]
-        x += buf[1]; y += buf[2]; z += buf[3]
+
+        time_point = time_point + buf[0]
+        x = x + buf[1]
+        y = y + buf[2]
+        z = z + buf[3]
+
         group += ['blue' for _ in buf[0]]
 
         # making DF

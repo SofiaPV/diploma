@@ -40,6 +40,7 @@ class MainWindow(QMainWindow):
         # connecting signals
         self.rows.editingFinished.connect(self._num_of_rows_handler)
         self.points_in_row.editingFinished.connect(self._num_of_points_handler)
+        self.fixed_rows.editingFinished.connect(self._fixed_rows_handler)
 
         #  add tool tips
         self.open_mainfile.setToolTip("Выберите файл с точками (x, y, z) до начала эксперимента. "
@@ -51,12 +52,19 @@ class MainWindow(QMainWindow):
         self._model = QStringListModel()
         self.file_view.setModel(self._model)
 
+    def _fixed_rows_handler(self):
+        try:
+            self._visualiser.calculator.fixed_rows = self.fixed_rows.text()
+        except Exception as e:
+            self._message(False, "Ошибка!", "Вы должны ввести целое число в "
+                                            "поля 'Число рядов', 'Точек в рядах' и 'Неподвижные ряды'.")
+
     def _num_of_points_handler(self):
         try:
             self._visualiser.calculator.points_in_row = self.points_in_row.text()
         except Exception as e:
             self._message(False, "Ошибка!", "Вы должны ввести целое число в "
-                                            "поля 'Число рядов' и 'Точек в рядах'")
+                                            "поля 'Число рядов', 'Точек в рядах' и 'Неподвижные ряды'.")
 
     def _num_of_rows_handler(self):
         try:
@@ -157,13 +165,19 @@ class MainWindow(QMainWindow):
 
     def _make_graphics(self):
 
+        message = "Вы не указали:\n"
         if self._visualiser.files is None:
-            self._message(False, "Ошибка!", "Вы не указали папку с файлами "
-                                            "эксперимента")
-            return
-
+            message += "* папку с файлами эксперимента\n"
         if self._visualiser.mainfile_name is None:
-            self._message(False, "Ошибка!", "Вы не указали файл с опорными точками")
+            message += "* файл с опорными точками\n"
+        if self._visualiser.calculator.fixed_rows is None:
+            message += "* кол-во неподвижных рядов\n"
+        if message != "Вы не указали:\n":
+            self._message(False, "Ошибка!", message)
+            return
+        if self._visualiser.calculator.rows < self._visualiser.calculator.fixed_rows:
+            self._message(False, "Ошибка!", "Число неподвижных рядов не может "
+                                            "превышать количество рядов")
             return
 
         self._message(True, "", "Данные обрабатываются. Пожалуйста, подождите.")

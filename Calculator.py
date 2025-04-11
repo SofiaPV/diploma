@@ -18,6 +18,22 @@ class Calculator:
 
         self._rows = None
         self._points_in_row = None
+        self._fixed_rows = None
+
+    @property
+    def fixed_rows(self):
+        return self._fixed_rows
+
+    @fixed_rows.setter
+    def fixed_rows(self, new_value):
+        try:
+            self._fixed_rows = int(new_value)
+        except ValueError:
+            self._fixed_rows = None
+            raise ValueError("fixed_rows должно быть целым числом")
+        except Exception as e:
+            print(f"Что-то пошло не так: {e}")
+            self._fixed_rows = None
 
     @property
     def rows(self):
@@ -52,10 +68,12 @@ class Calculator:
     @mainfile.setter
     def mainfile(self, new):
         self._mainfile = new
+        self._main = None
 
     @files.setter
     def files(self, new):
         self._files = new
+        self._original_points = []
 
     @property
     def mainframe(self):
@@ -88,7 +106,6 @@ class Calculator:
         :param points_in_row:  how many points a row has
         :return: matrix suitable for calculations
         """
-        print(f"m: {m}\n num_of_rows: {num_of_rows}\npoints_in_row: {points_in_row}")
         ans = []
         for i in range(num_of_rows * points_in_row):
             ans.append(list(m[i]))
@@ -142,12 +159,14 @@ class Calculator:
 
     def _read(self):
         try:
+            self._main = None
             self._main = self._manager.get_points(self._mainfile)
             if len(self._main) != self._points_in_row*self._rows:
                 raise InvalidFormatError("Количество точек не совпадает с заявленным")
         except (InvalidFormatError, AttributeError) as e:
             self._main = None
 
+        self._original_points = []
         for fname in self._files:
             try:
                 self._original_points.append(self._manager.get_points(fname))
@@ -162,11 +181,11 @@ class Calculator:
         angles, new position for every fame of deformed points
         """
         # !!! check if read data
-        num_of_rows = 3
+        num_of_rows = self._fixed_rows
         points_in_row = self._points_in_row
         l = 0
+        self._moved_points = []
 
-        print(f"main: {self._main}")
         before = self._make_matrices(self._main, num_of_rows, points_in_row)
         for i, frame in enumerate(self._original_points):
             after = np.array(frame[:num_of_rows * points_in_row])
