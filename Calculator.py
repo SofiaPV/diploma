@@ -175,6 +175,56 @@ class Calculator:
             except (InvalidFormatError, AttributeError) as e:
                 self._original_points = []
 
+    def _calc_info(self, p1, p2):
+        """
+        :param p1: original points (moved to fit moved points)
+        :param p2: moved points
+        :return:
+        """
+
+        # making np.arrays for easy calculations
+        p1 = np.array(p1)
+        p2 = np.array(p2)
+
+        # centroids
+        cent1 = p1.mean(axis=0)
+        cent2 = p2.mean(axis=0)
+
+        # Making points centered
+        centered1 = p1 - cent1
+        centered2 = p2 - cent2
+
+        # SVD
+        _, _, vh1 = np.linalg.svd(centered1)
+        _, _, vh2 = np.linalg.svd(centered2)
+
+        # f(t) = centroid + t*direction
+        direction1 = vh1[0]
+        direction2 = vh2[0]
+
+        # computing alpha
+        alpha = np.dot(direction1, direction2) / (np.linalg.norm(direction1) * np.linalg.norm(direction2))
+        alpha_rad = np.arccos(np.clip(alpha, -1.0, 1.0))
+        anpha_deg = np.degrees(alpha_rad)
+        print(f"Угол: {anpha_deg} градусов")
+
+        # searching for a plane
+        n = np.cross(direction1, direction2)
+        d = -n[0]*cent1[0] - n[1]*cent1[1] - n[2]*cent1[2]
+        print(f"Уравнение плоскости: {n[0]}x + {n[1]}y + {n[2]}z + {d} = 0")
+
+        # finding dx, dy
+        vec = cent2 - cent1
+        theta = np.dot(direction1, vec) / (np.linalg.norm(direction1) * np.linalg.norm(vec))
+        theta = np.arccos(np.clip(theta, -1.0, 1.0))
+        print(f"угол между вектором разницы средних и направлением изначального сечения: {np.degrees(theta)}")
+        dx = np.linalg.norm(np.linalg.norm(vec) * np.cos(theta) * direction1 / np.linalg.norm(direction1))
+        y_normal = np.cross(n, direction1)  # вектор перпендикулярный х в проведенной плоскости
+        dy = np.linalg.norm(np.linalg.norm(vec) * np.sin(theta) * y_normal / np.linalg.norm(y_normal))
+
+        print(f"dx: {dx}, dy: {dy}\n")
+
+
     def calculate(self):
         """
         takes original points, calculates rotation matrices, movement matrices,
@@ -192,3 +242,7 @@ class Calculator:
             M, b = self.calc_matrices(before, after, l)
             self._frame_info[i] = [M, b, self.compute_angels(M, True)]
             self._moved_points.append(self._main @ M + b)
+            for j in range(num_of_rows, self._rows):
+                print(f"Ряд {j} Кадр {i}")
+                self._calc_info(self._moved_points[-1][j * points_in_row: (j+1) * points_in_row],
+                                frame[j * points_in_row: (j+1) * points_in_row])
