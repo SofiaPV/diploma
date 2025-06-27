@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from FileManager import FileManager, InvalidFormatError
+from scipy.spatial.transform import Rotation as R
 
 
 class Calculator:
@@ -15,10 +16,15 @@ class Calculator:
                                       # before movement
         self._moved_points = []   #  a [x, y, z] array after movement
         self._frame_info = dict()
+        self._deformation_info = dict()
 
         self._rows = None
         self._points_in_row = None
         self._fixed_rows = None
+
+    @property
+    def deformation_info(self):
+        return self._deformation_info
 
     @property
     def fixed_rows(self):
@@ -120,12 +126,19 @@ class Calculator:
         :return [[theta (y axis), psi(rotation about x axis), phi (z-axis)], ...]
         """
 
+        #r = R.from_matrix(matrix)
+        #euler = r.as_euler('zyx', degrees=True)  # если порядок ZYX, то сначала X, потом Y, потом Z
+        #print(euler)
+        #return euler
+
+        #print(np.linalg.det(matrix))
         if matrix[2][0] != 1 and matrix[2][0] != -1:
 
             angles = np.array([[0., 0., 0.], [0., 0., 0.]])
 
             # theta
-            angles[0][0] = -math.asin(matrix[2][0])
+            #print(matrix[2][0])
+            angles[0][0] = -math.asin(max(-1, min(1, matrix[2][0])))
             angles[1][0] = math.pi - angles[0][0]
 
             # psi
@@ -206,24 +219,39 @@ class Calculator:
         alpha = np.dot(direction1, direction2) / (np.linalg.norm(direction1) * np.linalg.norm(direction2))
         alpha_rad = np.arccos(np.clip(alpha, -1.0, 1.0))
         anpha_deg = np.degrees(alpha_rad)
-        print(f"Угол: {anpha_deg} градусов")
+        #print(f"Угол: {anpha_deg} градусов")
 
         # searching for a plane
         n = np.cross(direction1, direction2)
         d = -n[0]*cent1[0] - n[1]*cent1[1] - n[2]*cent1[2]
-        print(f"Уравнение плоскости: {n[0]}x + {n[1]}y + {n[2]}z + {d} = 0")
+        #print(f"Уравнение плоскости: {n[0]}x + {n[1]}y + {n[2]}z + {d} = 0")
+        #print(f"Входит ли туда вторая точка: {n[0]*cent2[0]+n[1]*cent2[1]+n[2]*cent2[2]+d}=0?")
 
         # finding dx, dy
         vec = cent2 - cent1
         theta = np.dot(direction1, vec) / (np.linalg.norm(direction1) * np.linalg.norm(vec))
         theta = np.arccos(np.clip(theta, -1.0, 1.0))
-        print(f"угол между вектором разницы средних и направлением изначального сечения: {np.degrees(theta)}")
-        dx = np.linalg.norm(np.linalg.norm(vec) * np.cos(theta) * direction1 / np.linalg.norm(direction1))
-        y_normal = np.cross(n, direction1)  # вектор перпендикулярный х в проведенной плоскости
-        dy = np.linalg.norm(np.linalg.norm(vec) * np.sin(theta) * y_normal / np.linalg.norm(y_normal))
+        #print(f"угол между вектором разницы средних и направлением изначального сечения: {np.degrees(theta)}")
 
-        print(f"dx: {dx}, dy: {dy}\n")
+        dir1_norm = direction1 / np.linalg.norm(direction1)
+        y_normal = np.cross(n, direction1)
+        y_norm = y_normal / np.linalg.norm(y_normal)
+        dx = np.linalg.norm(vec) * np.cos(theta) #* np.sign(np.dot(vec, dir1_norm))
 
+        # TODO: remove new logic
+        #print(f"shape: {np.array(self._moved_points).shape}")
+        vec_x = np.array(self._moved_points[-1][self._points_in_row]) - np.array(self._moved_points[-1][0])
+        vec_y = np.array(self._moved_points[-1][self._points_in_row+1]) - np.array(self._moved_points[-1][0])
+        #print(f"{vec_x=}, {vec_y=}")
+        vec_z = np.cross(vec_x, vec_y)
+        #print(f"{vec_z=}")
+        # TODO: end of new logic, next line uses it
+        dy = np.linalg.norm(vec) * np.sin(theta) * np.sign(np.dot(vec, vec_z))  #* np.sign(np.dot(vec, y_norm))
+        #print(f"dy: {dy * y_norm}")
+        #dy = np.dot(y_normal, vec) / np.linalg.norm(y_normal)
+
+        #print(f"dx: {dx}, dy: {dy}\n")
+        return {"angle": anpha_deg, "dx": dx, "dy": dy, "directions": [direction1, direction2]}
 
     def calculate(self):
         """
@@ -235,14 +263,20 @@ class Calculator:
         points_in_row = self._points_in_row
         l = 0
         self._moved_points = []
+        self._deformation_info = dict()
 
         before = self._make_matrices(self._main, num_of_rows, points_in_row)
+        #print(f"_original_points: {len(self._original_points)}")
         for i, frame in enumerate(self._original_points):
             after = np.array(frame[:num_of_rows * points_in_row])
             M, b = self.calc_matrices(before, after, l)
-            self._frame_info[i] = [M, b, self.compute_angels(M, True)]
+            self._frame_info[i] = [np.round(M, 3), np.round(b, 3),
+                                   np.round(self.compute_angels(M, True), 3)]
             self._moved_points.append(self._main @ M + b)
+
+            self._deformation_info[i] = dict()
             for j in range(num_of_rows, self._rows):
-                print(f"Ряд {j} Кадр {i}")
-                self._calc_info(self._moved_points[-1][j * points_in_row: (j+1) * points_in_row],
+                #print(f"Ряд {j} Кадр {i}")
+                info = self._calc_info(self._moved_points[-1][j * points_in_row: (j+1) * points_in_row],
                                 frame[j * points_in_row: (j+1) * points_in_row])
+                self._deformation_info[i][j] = info

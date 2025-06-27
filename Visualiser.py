@@ -3,6 +3,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from Calculator import Calculator
 
+from scipy.spatial import Delaunay
+import numpy as np
+
 
 class Visualiser:
     def __init__(self, mainfile=None, files=None):
@@ -102,8 +105,65 @@ class Visualiser:
 
         df = self._make_df_calculated(orig, moved)
         frame_info = self._calculator.frame_info
+        defomation_info = self._calculator.deformation_info
 
         fig = px.scatter_3d(df, x='x', y='y', z='z', animation_frame="time", color='group')
+
+        # TODO Найдём точки из первой временной группы и группы 'red'
+        initial_time = df['time'].unique()[0]
+        initial_df = df[df['time'] == initial_time]
+        mesh_df = initial_df[initial_df['group'] == 'red']
+
+        if len(mesh_df) >= 3:
+            points_3d = mesh_df[['x', 'y', 'z']].values
+            points_2d = mesh_df[['x', 'y']].values
+            try:
+                tri = Delaunay(points_2d)
+                simplices = tri.simplices
+                mesh = go.Mesh3d(
+                    x=points_3d[:, 0],
+                    y=points_3d[:, 1],
+                    z=points_3d[:, 2],
+                    i=simplices[:, 0],
+                    j=simplices[:, 1],
+                    k=simplices[:, 2],
+                    opacity=0.1,
+                    facecolor=["rgba(255,0,0,0.9)"] * len(simplices),
+                    # color='red',
+                    name='деформ. пов-ть',
+                    showscale=False,
+                    legendgroup='red',  # <- связывает с красными точками
+                    showlegend=False,
+                )
+                fig.add_trace(mesh)
+            except Exception as e:
+                print(f"Initial mesh generation failed: {e}")
+
+        # Голубая поверхность в начальном кадре
+        mesh_df_blue = initial_df[initial_df['group'] == 'blue']
+        if len(mesh_df_blue) >= 3:
+            points_3d = mesh_df_blue[['x', 'y', 'z']].values
+            points_2d = mesh_df_blue[['x', 'y']].values
+            try:
+                tri = Delaunay(points_2d)
+                simplices = tri.simplices
+                mesh = go.Mesh3d(
+                    x=points_3d[:, 0],
+                    y=points_3d[:, 1],
+                    z=points_3d[:, 2],
+                    i=simplices[:, 0],
+                    j=simplices[:, 1],
+                    k=simplices[:, 2],
+                    facecolor=["rgba(0, 191, 255, 0.9)"] * len(simplices),
+                    name='недеф. пов-ть',
+                    showscale=False,
+                    legendgroup='blue',  # <- связывает с красными точками
+                    showlegend=False,  # <- не повторять в легенде
+                )
+                fig.add_trace(mesh)
+            except Exception as e:
+                print(f"Initial blue mesh generation failed: {e}")
+        # TODO END
 
         frames = []
         for time_group in df['time'].unique():
@@ -125,15 +185,80 @@ class Visualiser:
                             color='red' if group == 'red' else 'blue',
                         ),
                         legendgroup=group,
-                        name="Точки в состоянии покоя" if group == 'red' else "Точки в процессе эксперимента",
+                        name="Точки в состоянии покоя" if group == 'blue' else "Точки в процессе эксперимента",
                         showlegend=True
                     )
                 )
 
+            deformation_info_local = []
+            for row in defomation_info[time_group].keys():
+                deformation_info_local.append(f"Ряд {row+1}: Угол: {round(defomation_info[time_group][row]['angle'], 3)}°, "
+                                              f"dx: {round(defomation_info[time_group][row]['dx'], 5)}, "
+                                              f"dy: {round(defomation_info[time_group][row]['dy'], 5)}<br>")
+            deformation_info_local = ''.join(deformation_info_local)
+
+            mesh_traces = []
+
+            # TODO: Пример: только группа 'red' участвует в деформации
+            mesh_df = df_frame[df_frame['group'] == 'red']
+            if len(mesh_df) >= 3:  # для триангуляции нужно хотя бы 3 точки
+                points_3d = mesh_df[['x', 'y', 'z']].values
+                # Проекция на плоскость — допустим, XY
+                points_2d = mesh_df[['x', 'y']].values
+
+                try:
+                    tri = Delaunay(points_2d)
+                    simplices = tri.simplices  # индексы вершин треугольников
+
+                    mesh_traces.append(dict(
+                        type='mesh3d',
+                        x=points_3d[:, 0],
+                        y=points_3d[:, 1],
+                        z=points_3d[:, 2],
+                        i=simplices[:, 0],
+                        j=simplices[:, 1],
+                        k=simplices[:, 2],
+                        opacity=0.5,
+                        color='orange',
+                        name="деформ. пов-ть",
+                        showscale=False,
+                        legendgroup='red',  # <- связывает с красными точками
+                        showlegend=False,
+                    ))
+                except Exception as e:
+                    print(f"Delaunay failed for frame {time_group}: {e}")
+
+            # Для группы 'blue'
+            mesh_df_blue = df_frame[df_frame['group'] == 'blue']
+            if len(mesh_df_blue) >= 3:
+                points_3d = mesh_df_blue[['x', 'y', 'z']].values
+                points_2d = mesh_df_blue[['x', 'y']].values
+                try:
+                    tri = Delaunay(points_2d)
+                    simplices = tri.simplices
+                    mesh_traces.append(dict(
+                        type='mesh3d',
+                        x=points_3d[:, 0],
+                        y=points_3d[:, 1],
+                        z=points_3d[:, 2],
+                        i=simplices[:, 0],
+                        j=simplices[:, 1],
+                        k=simplices[:, 2],
+                        facecolor=["rgba(0, 191, 255, 0.3)"] * len(simplices),  # светло-голубой с прозрачностью
+                        name='недеф. пов-ть',
+                        showscale=False,
+                        legendgroup='blue',  # <- связывает с красными точками
+                        showlegend=False,
+                    ))
+                except Exception as e:
+                    print(f"Delaunay failed for blue in frame {time_group}: {e}")
+
+            # TODO
+
             frames.append(
                 dict(
                     name=str(time_group),
-                    data=traces,
+                    data=traces + mesh_traces,
                     layout=dict(
                         annotations=[dict(
                             x=1.,
@@ -142,7 +267,8 @@ class Visualiser:
                                  f"<br>{frame_info[time_group][0][2]}<br>"
                                  f"Сдвиг:<br>{frame_info[time_group][1]}<br>"
                                  f"Углы (°):<br>{frame_info[time_group][2][0]}<br>{frame_info[time_group][2][1]}"
-                                 f"<br>Вращение произведено вокруг осей в<br>следующем порядке: x, y, z",
+                                 f"<br>Вращение произведено вокруг осей в<br>следующем порядке: x, y, z<br><br>"
+                                 + deformation_info_local,
                             showarrow=False,
                             font=dict(size=12, color="white"),
                             align="left",
@@ -167,7 +293,7 @@ class Visualiser:
         # Настройка кнопки "play" для анимации
         fig.update_layout(
             margin=dict(
-                r=260,  # Отступ справа
+                r=300,  # Отступ справа 260
             ),
             sliders=[dict(
                 active=0,
